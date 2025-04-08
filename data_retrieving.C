@@ -7,7 +7,8 @@ void data_retrieving() {
      * @brief Open file from local path.
      * Returns an error if file is not opened.
      */
-    TFile *file = TFile::Open("/home/matilde/Downloads/1C037D8D-2092-2448-81A4-BE32B05BFB45.root");
+    //TFile *file = TFile::Open("/home/matilde/Downloads/1C037D8D-2092-2448-81A4-BE32B05BFB45.root");
+    TFile *file = TFile::Open("/home/matilde/Documenti/cmepda_project/skimmed.root");
 
     if (!file || file->IsZombie()) {
         std::cerr << "Error opening file." << std::endl;
@@ -29,6 +30,12 @@ void data_retrieving() {
     }
 
     event->Show();
+
+    /**
+     * @brief Gets number of branches inside the 'Events' TTree.
+     */
+    int nBranches = event->GetListOfBranches()->GetEntries();
+    std::cout << "Number of branches in Events: " << nBranches << std::endl;
 
     /**
      * @brief Closes file.
