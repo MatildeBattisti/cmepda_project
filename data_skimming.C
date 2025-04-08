@@ -1,6 +1,9 @@
 #include <TTree.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TObjArray.h>
+#include <TString.h>
+//#include <memory>
 #include <iostream>
 
 void data_skimming() {
@@ -9,6 +12,24 @@ void data_skimming() {
      */
     auto chain = std::make_unique<TChain>("Events");
     chain->Add("/home/matilde/Downloads/1C037D8D-2092-2448-81A4-BE32B05BFB45.root");
+   
+    /**
+     * @brief Reads all branches names in the 'Event' TTree.
+     * If it contins the word 'MET' (Missing Transverse Energy)
+     * sets the branch status to 1, otherwise to 0.
+     */
+    TObjArray *branches = chain->GetListOfBranches();
+    for(int i=0; i<branches->GetEntries(); i++) {
+        TBranch *branch = (TBranch*)branches->At(i);
+
+        TString branchName = branch->GetName();
+
+        if (branchName.Contains("MET")) {
+            chain->SetBranchStatus(branchName, 1);
+        } else {
+            chain->SetBranchStatus(branchName, 0);
+        }
+    }
 
     /**
      * @brief Selects entries that identify the run.
@@ -18,14 +39,9 @@ void data_skimming() {
     UInt_t luminosityBlock;
     ULong64_t event;
 
-    /**
-     * @brief Sets all branch statuses at zero.
-     */
-    chain->SetBranchStatus("*", 0);
-
-    /**
-     * @brief Selects only interesting branches setting their
-     * status at one.
+    /*
+     * @brief Selects the previous branches, setting their
+     * status to one.
      */
     chain->SetBranchStatus("run", 1);
     chain->SetBranchStatus("luminosityBlock", 1);
@@ -33,7 +49,7 @@ void data_skimming() {
     
     /**
      * @brief Gets the address of the selected branches to copy
-     * their valuesinside the new file.
+     * their values inside the new file.
      */
     chain->SetBranchAddress("run", &run);
     chain->SetBranchAddress("luminosityBlock", &luminosityBlock);
@@ -45,7 +61,6 @@ void data_skimming() {
      */
     auto skimfile = std::make_unique<TFile>("skimmed.root", "RECREATE");
 
-    //chain->LoadTree(0); only usefull in a for loop
     /**
      * @brief Clone full TTree structure and content,
      * considering that we set some branches status to zero.
