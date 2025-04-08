@@ -1,12 +1,13 @@
 #include <TTree.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <iostream>
 
 void data_skimming() {
     /**
      * @brief Selects the TTree 'Events' from CMS Open Data file.
      */
-    TChain *chain = new TChain("Events");
+    auto chain = std::make_unique<TChain>("Events");
     chain->Add("/home/matilde/Downloads/1C037D8D-2092-2448-81A4-BE32B05BFB45.root");
 
     /**
@@ -42,7 +43,7 @@ void data_skimming() {
      * @brief Creates blank new file to collect skimmed data.
      * If already existent, it recreates it.
      */
-    TFile *skimfile = new TFile("skimmed.root", "RECREATE");
+    auto skimfile = std::make_unique<TFile>("skimmed.root", "RECREATE");
 
     //chain->LoadTree(0); only usefull in a for loop
     /**
@@ -53,10 +54,7 @@ void data_skimming() {
 
     /**
      * @brief Writes the new tree than closes the new file.
-     * At last deletes chain to free memory -> TODO change to smart pointer
      */
     newtree->Write();
     skimfile->Close();
-
-    delete chain;
 }
