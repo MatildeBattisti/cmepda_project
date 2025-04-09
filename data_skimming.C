@@ -3,7 +3,6 @@
 #include <TFile.h>
 #include <TObjArray.h>
 #include <TString.h>
-//#include <memory>
 #include <iostream>
 
 void data_skimming() {
@@ -24,7 +23,7 @@ void data_skimming() {
 
         TString branchName = branch->GetName();
 
-        if (branchName.Contains("MET")) {
+        if (branchName.Contains("MET") && !branchName.Contains("HLT")) {
             chain->SetBranchStatus(branchName, 1);
         } else {
             chain->SetBranchStatus(branchName, 0);
