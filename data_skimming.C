@@ -10,12 +10,12 @@ void data_skimming() {
      * @brief Selects the TTree 'Events' from CMS Open Data file.
      */
     auto chain = std::make_unique<TChain>("Events");
-    chain->Add("/home/matilde/Downloads/1C037D8D-2092-2448-81A4-BE32B05BFB45.root");
+    chain->Add("/home/matilde/Downloads/2E96A5E9-C938-A149-BBBF-8FD81A9E5AD6.root");
    
     /**
      * @brief Reads all branches names in the 'Event' TTree.
-     * If it contins the word 'MET' (Missing Transverse Energy)
-     * sets the branch status to 1, otherwise to 0.
+     * Cleans data by only keeping MET and Jet entries
+     * excluding trigger entries.
      */
     TObjArray *branches = chain->GetListOfBranches();
     for(int i=0; i<branches->GetEntries(); i++) {
@@ -24,6 +24,8 @@ void data_skimming() {
         TString branchName = branch->GetName();
 
         if (branchName.Contains("MET") && !branchName.Contains("HLT")) {
+            chain->SetBranchStatus(branchName, 1);
+        } else if (branchName.Contains("Jet") && !branchName.Contains("L1") && !branchName.Contains("HLT")) {
             chain->SetBranchStatus(branchName, 1);
         } else {
             chain->SetBranchStatus(branchName, 0);
