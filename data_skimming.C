@@ -67,6 +67,7 @@ void data_skimming() {
     /**
      * @brief Creates blank new file to collect skimmed data.
      * If already existent, it recreates it.
+     * 
      */
     auto skimfile = std::make_unique<TFile>("datasets/skimmed1.root", "RECREATE");
 
