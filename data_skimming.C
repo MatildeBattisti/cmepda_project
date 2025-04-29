@@ -10,12 +10,12 @@ void data_skimming() {
      * @brief Selects the TTree 'Events' from CMS Open Data file.
      */
     auto chain = std::make_unique<TChain>("Events");
-    chain->Add("/home/matilde/Downloads/2E96A5E9-C938-A149-BBBF-8FD81A9E5AD6.root");
+    //chain->Add("datasets/2E96A5E9-C938-A149-BBBF-8FD81A9E5AD6.root"); // 0
+    chain->Add("datasets/6357E7BC-502C-2E45-A649-73A57B651715.root");  // 1
    
     /**
      * @brief Reads all branches names in the 'Event' TTree.
-     * Cleans data by only keeping MET and Jet entries
-     * excluding trigger entries.
+     * Cleans data by excluding trigger entries.
      */
     TObjArray *branches = chain->GetListOfBranches();
     for(int i=0; i<branches->GetEntries(); i++) {
@@ -23,9 +23,41 @@ void data_skimming() {
 
         TString branchName = branch->GetName();
 
-        if (branchName.Contains("MET") && !branchName.Contains("HLT")) {
+        if (branchName.Contains("MET") &&
+            !branchName.BeginsWith("Calo") &&
+            !branchName.BeginsWith("Chs") &&
+            !branchName.Contains("CorrT1") &&
+            !branchName.BeginsWith("Deep") &&
+            !branchName.Contains("Unclust") &&
+            !branchName.Contains("Puppi") &&
+            !branchName.BeginsWith("Raw") &&
+            !branchName.BeginsWith("Tk") &&
+            !branchName.Contains("fiducial") &&
+            !branchName.BeginsWith("Flag") &&
+            !branchName.Contains("HLT")
+        ) {
             chain->SetBranchStatus(branchName, 1);
-        } else if (branchName.Contains("Jet") && !branchName.Contains("L1") && !branchName.Contains("HLT")) {
+        }
+        else if (
+            branchName.Contains("Jet") &&
+            !branchName.Contains("btag") &&
+            !branchName.Contains("ch") &&
+            !branchName.Contains("hfsigma") &&
+            !branchName.Contains("Reg") &&
+            !branchName.Contains("electron") &&
+            !branchName.Contains("hf") &&
+            !branchName.Contains("muon") &&
+            !branchName.Contains("Constituents") &&
+            !branchName.Contains("SoftActivity") &&
+            !branchName.Contains("CorrT1") &&
+            !branchName.Contains("btag") &&
+            !branchName.Contains("EF") &&
+            !branchName.Contains("Flavour") &&
+            !branchName.Contains("cleanmask") &&
+            !branchName.Contains("Id") &&
+            !branchName.Contains("L1") &&
+            !branchName.Contains("HLT")
+        ) {
             chain->SetBranchStatus(branchName, 1);
         } else {
             chain->SetBranchStatus(branchName, 0);
@@ -33,34 +65,10 @@ void data_skimming() {
     }
 
     /**
-     * @brief Selects entries that identify the run.
-     * The entries have name and type of the original ones.
-     */
-    UInt_t run;
-    UInt_t luminosityBlock;
-    ULong64_t event;
-
-    /*
-     * @brief Selects the previous branches, setting their
-     * status to one.
-     */
-    chain->SetBranchStatus("run", 1);
-    chain->SetBranchStatus("luminosityBlock", 1);
-    chain->SetBranchStatus("event", 1);
-    
-    /**
-     * @brief Gets the address of the selected branches to copy
-     * their values inside the new file.
-     */
-    chain->SetBranchAddress("run", &run);
-    chain->SetBranchAddress("luminosityBlock", &luminosityBlock);
-    chain->SetBranchAddress("event", &event);
-
-    /**
      * @brief Creates blank new file to collect skimmed data.
      * If already existent, it recreates it.
      */
-    auto skimfile = std::make_unique<TFile>("skimmed.root", "RECREATE");
+    auto skimfile = std::make_unique<TFile>("datasets/skimmed1.root", "RECREATE");
 
     /**
      * @brief Clone full TTree structure and content,
