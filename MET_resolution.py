@@ -118,8 +118,8 @@ def feature_retrieving(params, data):
         #Jet_eta_bnd_log,    # in the paper
         #Jet_phi_bnd_log,
         #Jet_mass_bnd_log,
-        Jet_pt_brd,     # in the paper
-        Jet_eta_brd,    # in the paper
+        Jet_pt_brd,
+        Jet_eta_brd,
         Jet_phi_brd,
         Jet_mass_brd,
         #Jet_pt_brd_log,
