@@ -82,16 +82,10 @@ void data_skimming() {
     newtree->Branch("MET_significance", &MET_significance);
 
     /**
-     * @brief Log array for MET_pt entry.
-     */
-    Float_t MET_pt_log;
-    newtree->Branch("MET_pt_log", &MET_pt_log);
-    MET_pt_log = std::log(std::fabs(MET_pt)+1);
-
-    /**
      * @brief Selects only the first three jets and
      * defines them as new branches.
      * Creates log array for each entry.
+     * Log array for MET_pt entry.
      */
     Float_t Jet_eta_bst, Jet_eta_bnd, Jet_eta_brd;
     Float_t Jet_pt_bst, Jet_pt_bnd, Jet_pt_brd;
@@ -102,6 +96,8 @@ void data_skimming() {
     Float_t Jet_pt_bst_log, Jet_pt_bnd_log, Jet_pt_brd_log;
     Float_t Jet_phi_bst_log, Jet_phi_bnd_log, Jet_phi_brd_log;
     Float_t Jet_mass_bst_log, Jet_mass_bnd_log, Jet_mass_brd_log;
+
+    Float_t MET_pt_log;
 
     // Best Jet
     newtree->Branch("Jet_eta_bst", &Jet_eta_bst);
@@ -135,6 +131,11 @@ void data_skimming() {
     newtree->Branch("Jet_pt_brd_log", &Jet_pt_brd_log);
     newtree->Branch("Jet_phi_brd_log", &Jet_phi_brd_log);
     newtree->Branch("Jet_mass_brd_log", &Jet_mass_brd_log);
+
+    // MET_pt
+    newtree->Branch("MET_pt_log", &MET_pt_log);
+
+    Float_t min_MET_pt;
 
     Long64_t n_events = chain->GetEntries();
 
@@ -175,6 +176,12 @@ void data_skimming() {
         Jet_pt_brd_log = std::log(Jet_pt_brd + eps);
         Jet_phi_brd_log = std::log(Jet_phi_brd + eps);
         Jet_mass_brd_log = std::log(Jet_mass_brd + eps);
+
+        // MET_pt
+        if (MET_pt < min_MET_pt) {
+            min_MET_pt = MET_pt;
+        }
+        MET_pt_log = std::log(MET_pt + min_MET_pt + 1);
     
         newtree->Fill();
     }
