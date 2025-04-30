@@ -132,6 +132,7 @@ void data_skimming() {
 
     Float_t min_MET_pt;
     Float_t max_nJet;
+    Float_t eps = 6;
 
     Long64_t n_events = chain->GetEntries();
 
@@ -142,8 +143,6 @@ void data_skimming() {
         if (nJet > max_nJet) {
             max_nJet = nJet;
         }
-
-        Float_t eps = 6;
 
         // Best Jet
         Jet_eta_bst = (nJet > 0) ? Jet_eta[0] : 0.0f;
