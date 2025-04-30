@@ -26,6 +26,7 @@ void data_skimming() {
     Float_t MET_covXY;
     Float_t MET_covYY;
     Float_t MET_significance;
+    Float_t GenMET_pt;
 
     const int maxNJets = 18;
 
@@ -49,6 +50,7 @@ void data_skimming() {
     chain->SetBranchStatus("MET_covXY", 1);
     chain->SetBranchStatus("MET_covYY", 1);
     chain->SetBranchStatus("MET_significance", 1);
+    chain->SetBranchStatus("GenMET_pt", 1);
   
     /**
      * @brief Gets the address of the selected branches to copy
@@ -65,6 +67,7 @@ void data_skimming() {
     chain->SetBranchAddress("MET_covXY", &MET_covXY);
     chain->SetBranchAddress("MET_covYY", &MET_covYY);
     chain->SetBranchAddress("MET_significance", &MET_significance);
+    chain->SetBranchAddress("GenMET_pt", &GenMET_pt);
 
     /**
      * @brief Clone full TTree structure (not the content).
