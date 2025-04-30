@@ -26,10 +26,13 @@ void data_skimming() {
     Float_t MET_covXY;
     Float_t MET_covYY;
     Float_t MET_significance;
-    Float_t Jet_eta[4];
-    Float_t Jet_pt[4];
-    Float_t Jet_phi[4];
-    Float_t Jet_mass[4];
+
+    const int maxNJets = 18;
+
+    Float_t Jet_eta[maxNJets];
+    Float_t Jet_pt[maxNJets];
+    Float_t Jet_phi[maxNJets];
+    Float_t Jet_mass[maxNJets];
 
     /*
      * @brief Selects the previous branches, setting their
@@ -86,6 +89,8 @@ void data_skimming() {
 
     Float_t MET_pt_log;
 
+    Float_t m_hh;
+
     // Best Jet
     newtree->Branch("Jet_eta_bst", &Jet_eta_bst);
     newtree->Branch("Jet_pt_bst", &Jet_pt_bst);
@@ -122,12 +127,21 @@ void data_skimming() {
     // MET_pt
     newtree->Branch("MET_pt_log", &MET_pt_log);
 
+    // m_hh
+    newtree->Branch("m_hh", &m_hh);
+
     Float_t min_MET_pt;
+    Float_t max_nJet;
 
     Long64_t n_events = chain->GetEntries();
 
     for (Long64_t i = 0; i < n_events; ++i) {
         chain->GetEntry(i);
+
+        // Max number of Jets
+        if (nJet > max_nJet) {
+            max_nJet = nJet;
+        }
 
         Float_t eps = 6;
 
@@ -169,9 +183,15 @@ void data_skimming() {
             min_MET_pt = MET_pt;
         }
         MET_pt_log = std::log(MET_pt + min_MET_pt + 1);
-    
+        
+        // m_hh
+        m_hh = Jet_mass_bst + Jet_mass_bnd;
+
+        // Fill Tree with new entries
         newtree->Fill();
     }
+
+    std::cout << "Max number of Jets is:" << max_nJet ;
 
     /**
      * @brief Creates blank new file to collect skimmed data.
