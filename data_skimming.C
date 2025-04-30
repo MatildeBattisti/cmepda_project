@@ -64,22 +64,9 @@ void data_skimming() {
     chain->SetBranchAddress("MET_significance", &MET_significance);
 
     /**
-     * @brief Clone full TTree structure and content,
-     * considering that we set some branches status to zero.
+     * @brief Clone full TTree structure (not the content).
      */
     TTree *newtree = chain->CloneTree(0);
-
-    /**
-     * @brief Defines branches for the unchanged entries
-     * to insert in the new file.
-     */
-    newtree->Branch("nJet", &nJet);
-    newtree->Branch("MET_pt", &MET_pt);
-    newtree->Branch("MET_phi", &MET_phi);
-    newtree->Branch("MET_covXX", &MET_covXX);
-    newtree->Branch("MET_covXY", &MET_covXY);
-    newtree->Branch("MET_covYY", &MET_covYY);
-    newtree->Branch("MET_significance", &MET_significance);
 
     /**
      * @brief Selects only the first three jets and
