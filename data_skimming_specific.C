@@ -19,11 +19,6 @@ void data_skimming_specific() {
     chain->SetBranchStatus("*", 0);
 
     /**
-     * @brief Clone full TTree structure (not the content).
-     */
-    TTree *newtree = chain->CloneTree(0);
-
-    /**
      * @brief Only selects entries interesting for the ML model.
      * The entries have name and type of the original ones.
      */
@@ -93,6 +88,11 @@ void data_skimming_specific() {
     chain->SetBranchAddress("Muon_phi", &Muon_phi);
     chain->SetBranchAddress("Muon_mass", &Muon_mass);
     chain->SetBranchAddress("Muon_charge", &Muon_charge);
+
+    /**
+     * @brief Clone full TTree structure (not the content).
+     */
+    TTree *newtree = chain->CloneTree(0);
     
     /**
      * @param n_events Number of events in each file
@@ -128,14 +128,14 @@ void data_skimming_specific() {
     newtree->Branch("Jet_pt_bst", &Jet_pt_bst);
     newtree->Branch("Jet_phi_bst", &Jet_phi_bst);
     newtree->Branch("Jet_mass_bst", &Jet_mass_bst);
-    //newtree->Branch("Jet_btag_bst", &Jet_btag_bst);
+    newtree->Branch("Jet_btag_bst", &Jet_btag_bst);
 
     // Second best Jet
     newtree->Branch("Jet_eta_bnd", &Jet_eta_bnd);
     newtree->Branch("Jet_pt_bnd", &Jet_pt_bnd);
     newtree->Branch("Jet_phi_bnd", &Jet_phi_bnd);
     newtree->Branch("Jet_mass_bnd", &Jet_mass_bnd);
-    //newtree->Branch("Jet_btag_bnd", &Jet_btag_bnd);
+    newtree->Branch("Jet_btag_bnd", &Jet_btag_bnd);
 
     Float_t Muon_eta_st, Muon_eta_nd;
     Float_t Muon_pt_st, Muon_pt_nd;
@@ -169,27 +169,52 @@ void data_skimming_specific() {
     newtree->Branch("Muon_DeltaR", &Muon_DeltaR);
     newtree->Branch("Muon_InvMass", &Muon_InvMass);
 
-    Float_t btag_threshold = 0.3;
+    Float_t btag_threshold = 0.7;
 
     for (Long64_t i = 0; i < n_events; ++i) {
         chain->GetEntry(i);
 
-        //// First two b-tags
-        //Jet_btag_bst = (nJet > 0) ? Jet_btagDeepFlavB[0] : 0.0f;
-        //Jet_btag_bnd = (nJet > 1) ? Jet_btagDeepFlavB[1] : 0.0f;
-//
-        //if (Jet_btag_bst>btag_threshold && Jet_btag_bnd>btag_threshold) {
+        // Create array of indices
+        int indices[maxNJets];
+        for (int i = 0; i < maxNJets; ++i)
+            indices[i] = i;
+
+        // Sort indices based on values on btag descending
+        std::sort(indices, indices + maxNJets, [&](int i, int j) {
+            return Jet_btagDeepFlavB[i] > Jet_btagDeepFlavB[j];
+        });
+
+        // Create sorted arrays
+        Float_t Jet_btagDeepFlavB_sorted[maxNJets];
+        Float_t Jet_eta_sorted[maxNJets];
+        Float_t Jet_pt_sorted[maxNJets];
+        Float_t Jet_phi_sorted[maxNJets];
+        Float_t Jet_mass_sorted[maxNJets];
+
+        for (int i = 0; i < maxNJets; ++i) {
+            Jet_btagDeepFlavB_sorted[i] = Jet_btagDeepFlavB[indices[i]];
+            Jet_eta_sorted[i] = Jet_eta[indices[i]];
+            Jet_pt_sorted[i] = Jet_pt[indices[i]];
+            Jet_phi_sorted[i] = Jet_phi[indices[i]];
+            Jet_mass_sorted[i] = Jet_mass[indices[i]];
+        }
+
+        // First two sorted b-tags
+        Jet_btag_bst = (nJet > 0) ? Jet_btagDeepFlavB_sorted[0] : 0.0f;
+        Jet_btag_bnd = (nJet > 1) ? Jet_btagDeepFlavB_sorted[1] : 0.0f;
+
+        if (Jet_btag_bst>btag_threshold && Jet_btag_bnd>btag_threshold) {
             // Best Jet
-            Jet_eta_bst = (nJet > 0) ? Jet_eta[0] : 0.0f;
-            Jet_pt_bst = (nJet > 0) ? Jet_pt[0] : 0.0f;
-            Jet_phi_bst = (nJet > 0) ? Jet_phi[0] : 0.0f;
-            Jet_mass_bst = (nJet > 0) ? Jet_mass[0] : 0.0f;
+            Jet_eta_bst = (nJet > 0) ? Jet_eta_sorted[0] : 0.0f;
+            Jet_pt_bst = (nJet > 0) ? Jet_pt_sorted[0] : 0.0f;
+            Jet_phi_bst = (nJet > 0) ? Jet_phi_sorted[0] : 0.0f;
+            Jet_mass_bst = (nJet > 0) ? Jet_mass_sorted[0] : 0.0f;
 
             // Second best Jet
-            Jet_eta_bnd = (nJet > 1) ? Jet_eta[1] : 0.0f;
-            Jet_pt_bnd = (nJet > 1) ? Jet_pt[1] : 0.0f;
-            Jet_phi_bnd = (nJet > 1) ? Jet_phi[1] : 0.0f;
-            Jet_mass_bnd = (nJet > 1) ? Jet_mass[1] : 0.0f;
+            Jet_eta_bnd = (nJet > 1) ? Jet_eta_sorted[1] : 0.0f;
+            Jet_pt_bnd = (nJet > 1) ? Jet_pt_sorted[1] : 0.0f;
+            Jet_phi_bnd = (nJet > 1) ? Jet_phi_sorted[1] : 0.0f;
+            Jet_mass_bnd = (nJet > 1) ? Jet_mass_sorted[1] : 0.0f;
 
             // First Muon
             Muon_eta_st = (nJet > 0) ? Muon_eta[0] : 0.0f;
@@ -215,8 +240,9 @@ void data_skimming_specific() {
         
             Muon_InvMass = std::sqrt((Muon_E_st+Muon_E_nd)*(Muon_E_st+Muon_E_nd)-
                 std::abs(Muon_pt_st+Muon_pt_nd)*std::abs(Muon_pt_st+Muon_pt_nd));
-        //}
+        
         newtree->Fill();
+        }
     }
 
     /**
