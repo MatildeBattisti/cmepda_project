@@ -10,8 +10,8 @@ void data_skimming_specific() {
     auto chain = std::make_unique<TChain>("Events");
     chain->Add("datasets/6357E7BC-502C-2E45-A649-73A57B651715.root");  // dataset 0
     //chain->Add("datasets/DB4AFAC8-16AD-AB48-82D2-1E9DAE8AB314.root");  // dataset 1
-    //chain->Add("datasets/");  // dataset 2
-    //chain->Add("datasets/");  // dataset 3
+    //chain->Add("datasets/77DB0F5B-4123-4E4B-A9D0-3CEBA8575834.root");  // dataset 2
+    //chain->Add("datasets/048A040C-DA63-1949-9BA7-075371EB4296.root");  // dataset 3
    
     /**
      * @brief Sets all branch statuses to zero.
@@ -111,7 +111,38 @@ void data_skimming_specific() {
         }
     }
 
-    std::cout << "Max number of Jets is: " << max_nJet;
+    std::cout << "Max number of Jets is: " << max_nJet << std::endl;
+
+    /**
+     * @brief Calculate mean and standard deviation of GenMET
+     * to later perform a statistical cut on outliers.
+     */
+    Float_t sum = 0.0;
+    Float_t sum2 = 0.0;
+    Long64_t count = 0;
+
+    for (Long64_t i = 0; i < n_events; ++i) {
+        chain->GetEntry(i);
+        sum += GenMET_pt;
+        count++;
+    }
+
+    Float_t GenMET_mean = sum / count;
+    Float_t GenMET_variance_num = 0.0;
+
+    for (Long64_t i = 0; i < n_events; ++i) {
+        chain->GetEntry(i);
+        GenMET_variance_num += (GenMET_pt - GenMET_mean)*(GenMET_pt - GenMET_mean);
+    }
+
+    Float_t GenMET_variance = GenMET_variance_num / count;
+    Float_t GenMET_std = std::sqrt(GenMET_variance);
+
+    Float_t GenMET_cut = GenMET_mean + 3*GenMET_std;
+
+    std::cout << "Mean GenMET_pt: " << GenMET_mean << std::endl;
+    std::cout << "Standard deviation GenMET_pt: " << GenMET_std << std::endl;
+    std::cout << "GenMET_pt cut performed at: " << GenMET_cut << std::endl;
 
     /**
      * @brief Selects only the first two jets above b-tag threshold
@@ -203,7 +234,7 @@ void data_skimming_specific() {
         Jet_btag_bst = (nJet > 0) ? Jet_btagDeepFlavB_sorted[0] : 0.0f;
         Jet_btag_bnd = (nJet > 1) ? Jet_btagDeepFlavB_sorted[1] : 0.0f;
 
-        if (Jet_btag_bst>btag_threshold && Jet_btag_bnd>btag_threshold) {
+        if (Jet_btag_bst>btag_threshold && Jet_btag_bnd>btag_threshold && GenMET_pt<GenMET_cut) {
             // Best Jet
             Jet_eta_bst = (nJet > 0) ? Jet_eta_sorted[0] : 0.0f;
             Jet_pt_bst = (nJet > 0) ? Jet_pt_sorted[0] : 0.0f;
